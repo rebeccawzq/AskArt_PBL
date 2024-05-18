@@ -1,0 +1,40 @@
+@import './base.css';
+
+#app {
+  width: 100%; /* Ensures it takes full viewport width */
+  max-width: none; /* Removes restriction on maximum width */
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+    justify-content: center; /* Aligns content horizontally at the center */
+    align-items: center; /* Aligns content vertically at the center */
+    height: 100vh; /* Full viewport height */
+  }
+
+  #app {
+    display: flex;
+    grid-template-columns: 1fr 1fr;
+    padding: 0 2rem;
+    width: 100%; /* Take full width to align with viewport settings */
+  }
+}
