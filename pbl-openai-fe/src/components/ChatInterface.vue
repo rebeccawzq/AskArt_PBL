@@ -4,10 +4,10 @@
       <div
         v-for="message in messages"
         :key="message.id"
-        :class="{'message-user': message.text.startsWith('User:'), 'message-ai': message.text.startsWith('AI:')}"
+        :class="{'message-user': message.type === 'user', 'message-ai': message.type === 'ai'}"
         @contextmenu.prevent="handleContextMenu($event)"
       >
-        {{ stripPrefix(message.text) }}
+        {{ message.content }}
       </div>
     </div>
     <div ref="contextMenu" v-if="showContextMenu" :style="{ top: menuPosition.y, left: menuPosition.x }" class="context-menu">
@@ -44,10 +44,31 @@ export default {
       menuPosition: { x: '0px', y: '0px' },
       selectedText: '',
       followUpQuestions: [],
-      thinkingMessageId: null
+      thinkingMessageId: null,
+      localStorageKey: 'chat-messages',
+      messageCounter: 0,
     };
   },
   methods: {
+    saveMessageToLocalStorage(message) {
+      const savedMessages = JSON.parse(localStorage.getItem(this.localStorageKey)) || [];
+      savedMessages.push(message);
+      localStorage.setItem(this.localStorageKey, JSON.stringify(savedMessages));
+      window.savedMessages = savedMessages;
+    },
+    loadMessagesFromLocalStorage() {
+      const savedMessages = localStorage.getItem(this.localStorageKey);
+      if (savedMessages) {
+        try {
+          // only load the first 20 messages
+          this.messages = JSON.parse(savedMessages).slice(-20);
+          this.messageCounter = this.messages[this.messages.length - 1].id + 1;
+        } catch (e) {
+          console.error('Error parsing JSON from localStorage:', e);
+          this.messages = [];
+        }
+      }
+    },
     async sendInput() {
       if (!this.userInput.trim()) {
       return;
@@ -60,10 +81,13 @@ export default {
         body: JSON.stringify({ user_prompt: this.userInput })
       });
 
-      this.messages.push({ id: this.messages.length, text: `User: ${this.userInput}` });
+      const userMessage = { id: this.messageCounter++, type: 'user', content: this.userInput };
+      this.messages.push(userMessage);
+      this.saveMessageToLocalStorage(userMessage);
+
       this.userInput = ''; // Clear input field
       // Add user message
-      const thinkingMessage = { id: this.messages.length, text: `AI: 正在思考...` };
+      const thinkingMessage = { id: this.messageCounter++, type: 'ai', content: '正在思考...' };
       this.messages.push(thinkingMessage);
       this.thinkingMessageId = thinkingMessage.id;
 
@@ -95,7 +119,10 @@ export default {
       if (index !== -1) {
         this.messages.splice(index, 1);
       }
-      this.messages.push({ id: this.messages.length, text: `AI: ${text}` });
+      const aiMessage = { id: this.messageCounter++, type: 'ai', content: text };
+      this.messages.push(aiMessage);
+      this.saveMessageToLocalStorage(aiMessage);
+      window.messages = this.messages;
     },
     async fetchFollowUpQuestions() {
       try {
@@ -143,14 +170,6 @@ export default {
       this.$emit('add-keyword', this.selectedText);
       this.showContextMenu = false;
     },
-    stripPrefix(text) {
-      if (text.startsWith('User:')) {
-        return text.slice(5).trim();
-      } else if (text.startsWith('AI:')) {
-        return text.slice(3).trim();
-      }
-      return text;
-    },
     startRecognition() {
       if (!this.recognition) {
         this.recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -173,6 +192,12 @@ export default {
     }
   },
   mounted() {
+    const savedMessages = localStorage.getItem(this.localStorageKey);
+    if (!savedMessages || savedMessages === '[object Object]') {
+        localStorage.setItem(this.localStorageKey, JSON.stringify([]));
+    } else {
+        // this.loadMessagesFromLocalStorage();
+    }
     document.addEventListener('mousedown', this.closeContextMenu);
   },
   beforeDestroy() {
@@ -230,29 +255,6 @@ export default {
 .follow-up-questions li:hover {
   background-color: #f0f0f0;
 }
-/*.follow-up-questions ul {*/
-/*  display: flex;*/
-/*  bottom: 10px; !* Adjusted to ensure it does not overlap chat input *!*/
-/*  left: 0;*/
-/*  right: 0;*/
-/*  margin: auto;*/
-/*  background: #fff;*/
-/*  border: 1px solid #ccc;*/
-/*  padding: 10px;*/
-/*  border-radius: 5px;*/
-/*  width: auto;*/
-/*  max-width: 90%; !* Ensures it does not get too wide on large screens *!*/
-/*  z-index: 100;*/
-/*}*/
-/*.follow-up-questions li {*/
-/*  padding: 5px 10px;*/
-/*  cursor: pointer;*/
-/*  display: block; !* Ensures each question is on a new line *!*/
-/*  color: #676767;*/
-/*}*/
-/*.follow-up-questions li:hover {*/
-/*  background-color: #f0f0f0;*/
-/*}*/
 .message-user,
 .message-ai {
   display: inline-block;
@@ -287,9 +289,6 @@ export default {
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/*.voice-button {*/
-
-/*}*/
 
 .voice-button:hover {
   background: #e0e0e0;

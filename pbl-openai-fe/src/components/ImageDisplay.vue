@@ -6,7 +6,7 @@
         :key="index"
         :class="{'message-user': message.type === 'user', 'message-image': message.type === 'image', 'message-thinking': message.type === 'thinking'}"
       >
-        <img v-if="message.type === 'image'" :src="message.content" alt="Generated Image" />
+        <img v-if="message.type === 'image'" :src="message.content" alt="Generated Image" class="fixed-image-size"/>
         <span v-else>{{ message.content }}</span>
       </div>
     </div>
@@ -24,6 +24,8 @@
 </template>
 
 <script>
+import timeoutImage from '../assets/timeout.png';
+import errorImage from '../assets/error.png';
 export default {
   props: ['imagePrompt', 'keywords'],
   data() {
@@ -32,46 +34,100 @@ export default {
       messages: [],
       imageUrl: '',
       thinkingMessageId: null,
-      showKeywords: true
+      showKeywords: true,
+      localStorageKey: 'img-messages',
+      messageCounter: 0,
     };
   },
   methods: {
+    saveMessageToLocalStorage(message) {
+      const savedMessages = JSON.parse(localStorage.getItem(this.localStorageKey)) || [];
+      savedMessages.push(message);
+      localStorage.setItem(this.localStorageKey, JSON.stringify(savedMessages));
+      window.savedMessages = savedMessages;
+    },
+    loadMessagesFromLocalStorage() {
+      const savedMessages = localStorage.getItem(this.localStorageKey);
+      if (savedMessages) {
+        try {
+          // only load the first 4 messages
+          this.messages = JSON.parse(savedMessages).slice(-10);
+          this.messageCounter = this.messages[this.messages.length - 1].id + 1;
+        } catch (e) {
+          console.error('Error parsing JSON from localStorage:', e);
+          this.messages = [];
+        }
+      }
+    },
     async fetchImage() {
       if (!this.userInput.trim()) {
         return;
       }
       // Add user message
-      this.messages.push({ type: 'user', content: this.userInput });
+      const userMessage = { id: this.messageCounter++, type: 'user', content: this.userInput };
+      this.messages.push(userMessage);
+      // if keyword is not empty, add it to user message
+      if (this.keywords.length > 0) {
+        userMessage.keywords = this.keywords;
+      }
+      this.saveMessageToLocalStorage(userMessage);
       const userInput = this.userInput;
       this.userInput = ''; // Clear input field
 
       // Add thinking message
-      const thinkingMessage = { type: 'thinking', content: '图片生成中...' };
+      const thinkingMessage = { id: this.messageCounter++, type: 'thinking', content: '图片生成中...' };
       this.messages.push(thinkingMessage);
-      this.thinkingMessageId = this.messages.length - 1; // Save thinking message index
+      this.thinkingMessageId = thinkingMessage.id;
 
+      const timeout = 10000; // 10 seconds timeout
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out')), timeout)
+      );
       try {
-        const response = await fetch('http://localhost:8300/image/false', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ user_prompt: userInput })
-        });
+        const response = await Promise.race([
+          fetch('http://localhost:8300/image/false', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ user_prompt: userInput, key_words: this.keywords })
+          }),
+          timeoutPromise
+        ]);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         this.imageUrl = data.image_url;
 
         // Remove thinking message
-        if (this.thinkingMessageId !== null) {
-          this.messages.splice(this.thinkingMessageId, 1);
-          this.thinkingMessageId = null;
+        const index = this.messages.findIndex(message => message.id === this.thinkingMessageId);
+        if (index !== -1) {
+          this.messages.splice(index, 1);
         }
 
         // Add image message
-        this.messages.push({ type: 'image', content: this.imageUrl });
+        const imageMessage = { id: this.messageCounter++, type: 'image', content: this.imageUrl };
+        this.messages.push(imageMessage);
+        this.saveMessageToLocalStorage(imageMessage);
 
       } catch (error) {
         console.error('Error fetching image:', error);
+
+        // Remove thinking message
+        const index = this.messages.findIndex(message => message.id === this.thinkingMessageId);
+        if (index !== -1) {
+          this.messages.splice(index, 1);
+        }
+
+        // Add error or timeout image
+        const errorMessage = {
+          id: this.messageCounter++,
+          type: 'image',
+          content: error.message === 'Request timed out' ? timeoutImage : errorImage
+        };
+        this.messages.push(errorMessage);
+        this.saveMessageToLocalStorage(errorMessage);
       }
     },
     removeKeyword(index) {
@@ -88,12 +144,22 @@ export default {
   },
   mounted() {
     // Make keywords accessible in the browser's console for debugging
-    window.img_keywords = this.keywords;
+    const savedMessages = localStorage.getItem(this.localStorageKey);
+    if (!savedMessages || savedMessages === '[object Object]') {
+        localStorage.setItem(this.localStorageKey, JSON.stringify([]));
+    } else {
+        // this.loadMessagesFromLocalStorage();
+    }
   }
 }
 </script>
 
 <style scoped>
+.fixed-image-size {
+  width: 256px;
+  height: 256px;
+  object-fit: cover; /* Ensure the image covers the area without distortion */
+}
 .image-display img {
   max-width: 100%;
   border-radius: 4px;
