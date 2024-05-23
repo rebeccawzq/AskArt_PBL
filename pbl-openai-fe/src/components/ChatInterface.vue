@@ -196,18 +196,25 @@ export default {
       }
     }
   },
-  mounted() {
-    const start_msg = { id: this.messageCounter++, type: 'ai', content: '你好' };
+mounted() {
+  const savedMessages = localStorage.getItem(this.localStorageKey);
+  if (!savedMessages || savedMessages === '[]' || savedMessages === '[object Object]') {
+    const start_msg = { id: this.messageCounter++, type: 'ai', content: '哈喽👋我是你的智囊团，有什么不懂的尽管问我吧！\n你可以问我：\n龙生九子中的饕餮有什么特点？眼睛是什么颜色？\n你也可以问我：\n扭扭棒要怎么制作？' };
     this.messages.push(start_msg);
-    const savedMessages = localStorage.getItem(this.localStorageKey);
-    if (!savedMessages || savedMessages === '[object Object]') {
-        localStorage.setItem(this.localStorageKey, JSON.stringify([]));
-    } else {
-        // this.loadMessagesFromLocalStorage();
+    this.saveMessageToLocalStorage(start_msg);
+  } else {
+    try {
+      // Load only the last 20 messages
+      this.messages = JSON.parse(savedMessages).slice(-20);
+      this.messageCounter = this.messages[this.messages.length - 1].id + 1;
+    } catch (e) {
+      console.error('Error parsing JSON from localStorage:', e);
+      this.messages = [];
     }
-    document.addEventListener('mousedown', this.closeContextMenu);
-    this.followUpQuestions = this.hardcodedFollowUpQuestions;
-  },
+  }
+  document.addEventListener('mousedown', this.closeContextMenu);
+  this.followUpQuestions = this.hardcodedFollowUpQuestions;
+},
   beforeDestroy() {
     document.removeEventListener('mousedown', this.closeContextMenu);
   }
