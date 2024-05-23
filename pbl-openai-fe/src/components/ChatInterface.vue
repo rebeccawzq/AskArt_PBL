@@ -13,7 +13,7 @@
     <div ref="contextMenu" v-if="showContextMenu" :style="{ top: menuPosition.y, left: menuPosition.x }" class="context-menu">
       <ul>
         <li @click="generateImageFromText">生成图片</li>
-        <li @click="fetchFollowUpQuestions">追问</li>
+<!--        <li @click="fetchFollowUpQuestions">追问</li>-->
         <li @click="addAsKeyword">添加为关键词句</li>
       </ul>
     </div>
