@@ -17,15 +17,7 @@
         <li @click="addAsKeyword">添加为修饰语</li>
       </ul>
     </div>
-    <div class="input-container-wrapper">
-      <div class="input-container">
-        <button @mousedown="startRecognition" @mouseup="stopRecognition" @mouseleave="stopRecognition" class="voice-button">
-          🎙️
-        </button>
-        <textarea v-model="userInput" placeholder="我的问题是"></textarea>
-        <button @click="sendInput">发送</button>
-      </div>
-      <div class="follow-up-questions-container">
+    <div class="follow-up-questions-container">
         <div class="follow-up-questions" v-if="followUpQuestions.length > 0">
           <ul>
             <li v-for="(question, index) in followUpQuestions" :key="index" @click="selectQuestion(question)">
@@ -33,6 +25,14 @@
             </li>
           </ul>
         </div>
+      </div>
+    <div class="input-container-wrapper">
+      <div class="input-container">
+        <button @mousedown="startRecognition" @mouseup="stopRecognition" @mouseleave="stopRecognition" class="voice-button">
+          🎙️
+        </button>
+        <textarea v-model="userInput" placeholder="我的问题是" @keydown.enter="sendInput"></textarea>
+        <button @click="sendInput">发送</button>
       </div>
     </div>
   </div>
