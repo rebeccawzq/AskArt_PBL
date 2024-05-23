@@ -13,23 +13,26 @@
     <div ref="contextMenu" v-if="showContextMenu" :style="{ top: menuPosition.y, left: menuPosition.x }" class="context-menu">
       <ul>
         <li @click="generateImageFromText">生成图片</li>
-        <li @click="fetchFollowUpQuestions">追问</li>
-        <li @click="addAsKeyword">添加为关键词句</li>
+        <li @click="addAsKeyword">添加为修饰语</li>
       </ul>
     </div>
-        <div class="input-container">
-      <button @mousedown="startRecognition" @mouseup="stopRecognition" @mouseleave="stopRecognition" class="voice-button">
-        🎙️
-      </button>
-      <textarea v-model="userInput" placeholder="我的问题是"></textarea>
-      <button @click="sendInput">发送</button>
-    </div>
-    <div class="follow-up-questions" v-if="followUpQuestions.length > 0">
-      <ul>
-        <li v-for="(question, index) in followUpQuestions" :key="index" @click="selectQuestion(question)">
-          {{ question }}
-        </li>
-      </ul>
+    <div class="input-container-wrapper">
+      <div class="input-container">
+        <button @mousedown="startRecognition" @mouseup="stopRecognition" @mouseleave="stopRecognition" class="voice-button">
+          🎙️
+        </button>
+        <textarea v-model="userInput" placeholder="我的问题是"></textarea>
+        <button @click="sendInput">发送</button>
+      </div>
+      <div class="follow-up-questions-container">
+        <div class="follow-up-questions" v-if="followUpQuestions.length > 0">
+          <ul>
+            <li v-for="(question, index) in followUpQuestions" :key="index" @click="selectQuestion(question)">
+              {{ question }}
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -39,7 +42,7 @@ export default {
   data() {
     return {
       userInput: '',
-      messages: [],
+      messages: [],  // todo: limit the length of messages
       showContextMenu: false,
       menuPosition: { x: '0px', y: '0px' },
       selectedText: '',
@@ -47,6 +50,7 @@ export default {
       thinkingMessageId: null,
       localStorageKey: 'chat-messages',
       messageCounter: 0,
+      hardcodedFollowUpQuestions: ["How can I help you?", "Do you need more information?", "Is there anything else you want to know?"],
     };
   },
   methods: {
@@ -123,20 +127,20 @@ export default {
       this.messages.push(aiMessage);
       this.saveMessageToLocalStorage(aiMessage);
       window.messages = this.messages;
+      await this.fetchFollowUpQuestions();
     },
     async fetchFollowUpQuestions() {
       try {
         const response = await fetch('http://18.223.254.93/backend/chat/follow-up');
         if (response.ok) {
           const data = await response.json();
-          this.followUpQuestions = data.message; // Assuming the response contains an array of questions
-          this.showContextMenu = false; // Close the context menu
+          this.followUpQuestions = data.message.length > 0 ? data.message : this.hardcodedFollowUpQuestions;
         } else {
           throw new Error('Failed to fetch follow-up questions');
         }
       } catch (error) {
         console.error('Error:', error);
-        this.followUpQuestions = []; // Reset follow-up questions on error
+        this.followUpQuestions = this.hardcodedFollowUpQuestions; // Use hardcoded questions on error
       }
     },
     handleContextMenu(event) {
@@ -192,6 +196,8 @@ export default {
     }
   },
   mounted() {
+    const start_msg = { id: this.messageCounter++, type: 'ai', content: '你好' };
+    this.messages.push(start_msg);
     const savedMessages = localStorage.getItem(this.localStorageKey);
     if (!savedMessages || savedMessages === '[object Object]') {
         localStorage.setItem(this.localStorageKey, JSON.stringify([]));
@@ -199,6 +205,7 @@ export default {
         // this.loadMessagesFromLocalStorage();
     }
     document.addEventListener('mousedown', this.closeContextMenu);
+    this.followUpQuestions = this.hardcodedFollowUpQuestions;
   },
   beforeDestroy() {
     document.removeEventListener('mousedown', this.closeContextMenu);
@@ -287,6 +294,20 @@ export default {
   background: white;
   border-top: 1px solid #e0e0e0;
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.input-container-wrapper {
+  display: flex;
+  flex-direction: column-reverse;
+  background: #f9f9f9;
+}
+
+.follow-up-questions-container {
+  display: flex;
+  justify-content: center;
+  background: #f9f9f9;
+  height: 200px;
+  align-items: flex-end;
 }
 
 

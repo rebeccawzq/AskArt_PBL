@@ -1,6 +1,6 @@
  <template>
   <div class="image-display">
-  <div class="messages">
+    <div class="messages">
       <div
         v-for="(message, index) in messages"
         :key="index"
@@ -10,15 +10,19 @@
         <span v-else>{{ message.content }}</span>
       </div>
     </div>
-    <div class="input-container">
-      <textarea v-model="userInput" placeholder="我想生成的图片是"></textarea>
-      <button @click="fetchImage">生成图片</button>
-    </div>
-    <button @click="toggleKeywords">关键词</button>
-    <div class="keywords-list" v-if="showKeywords">
-      <p v-for="(keyword, index) in keywords" :key="index" class="keyword">
-        {{ keyword }} <button @click="removeKeyword(index)">移除</button>
-      </p>
+    <div class="input-container-wrapper">
+      <div class="keywords-container">
+        <div class="keywords-list">
+          <div v-for="(keyword, index) in keywords" :key="index" class="keyword">
+              <span class="keyword-text">{{ keyword }}</span>
+              <span class="close-button" @click="removeKeyword(index)">x</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-container">
+        <textarea v-model="userInput" placeholder="我想生成的图片是"></textarea>
+        <button @click="fetchImage">生成图片</button>
+      </div>
     </div>
   </div>
 </template>
@@ -31,7 +35,7 @@ export default {
   data() {
     return {
       userInput: this.imagePrompt,
-      messages: [],
+      messages: [], // todo: limit the length of messages
       imageUrl: '',
       thinkingMessageId: null,
       showKeywords: true,
@@ -205,7 +209,51 @@ export default {
   border-radius: 4px;
 }
 
+.input-container-wrapper {
+  display: flex;
+  flex-direction: column;
+  background: #f9f9f9;
+}
+.keywords-container {
+  display: flex;
+  justify-content: flex-start;
+  background: #f9f9f9;
+  padding: 10px;
+}
+
+.keywords-list {
+  display: flex;
+  flex-direction: row; /* Display items in a row */
+  flex-wrap: wrap; /* Allow items to wrap to the next line */
+  gap: 5px; /* Add space between items */
+  align-items: flex-end; /* Align items at the top */
+  height: 180px;
+}
+
 .keyword {
-  color: #000000; /* 设置关键词颜色为黑色 */
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 5px 15px;
+  margin: 5px;
+  /*background: #f1f1f1;*/
+  border-radius: 4px;
+  padding-right: 20px;
+}
+
+.keyword .keyword-text {
+  background: #888888;
+  border-radius: 4px;
+  padding: 5px 10px;
+}
+
+.keyword .close-button {
+  position: absolute;
+  top: 5%;
+  right: 9px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: red;
+  font-weight: bold;
 }
 </style>

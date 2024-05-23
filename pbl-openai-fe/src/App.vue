@@ -127,6 +127,10 @@ function removeKeyword(index) {
 :deep(.chat-interface .messages), :deep(.image-display .messages) {
   flex: 1;
   padding: 10px;
+  /*padding-bottom: 100px;*/
+  /*padding-left: 10px;*/
+  /*padding-right: 10px;*/
+  /*padding-top: 10px;*/
   overflow-y: auto;
   background: #f9f9f9;
   display: flex;
