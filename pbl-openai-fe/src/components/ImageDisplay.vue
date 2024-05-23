@@ -1,13 +1,13 @@
- <template>
+<template>
   <div class="image-display">
     <div class="messages">
       <div
         v-for="(message, index) in messages"
         :key="index"
-        :class="{'message-user': message.type === 'user', 'message-image': message.type === 'image', 'message-thinking': message.type === 'thinking'}"
+        :class="['message', message.type === 'user' ? 'message-user' : '', message.type === 'image' ? 'message-image' : '', message.type === 'thinking' ? 'message-thinking' : '', message.className ? message.className : '']"
       >
         <img v-if="message.type === 'image'" :src="message.content" alt="Generated Image" class="fixed-image-size"/>
-        <span v-else>{{ message.content }}</span>
+        <span v-else v-html="message.content"></span>
       </div>
     </div>
     <div class="input-container-wrapper">
@@ -148,11 +148,11 @@ export default {
   },
   mounted() {
     // Make keywords accessible in the browser's console for debugging
-     const start_msg = { id: this.messageCounter++, type: 'ai', content: '哈喽👋我是你的小画师，有什么想画的都可以告诉我！\n' +
-      '你可以说：' +
-      '绘制螭吻龙，表现它在吞食东西，装饰在古代建筑的脊尾上。' +
-      '如果你和智囊团在聊天的时候提到了想画出来的东西，可以选中聊天记录后点击右键，通过生成图片/添加为修饰语告诉我哦🎨'};
-    this.messages.push(start_msg);
+const start_msg = { id: this.messageCounter++, type: 'ai', content: '哈喽👋我是你的小画师，有什么想画的都可以告诉我！<br>' +
+    '你可以说：<br>' +
+    '绘制螭吻龙，表现它在吞食东西，装饰在古代建筑的脊尾上。<br>' +
+    '如果你和智囊团在聊天的时候提到了想画出来的东西，可以选中聊天记录后点击右键，通过生成图片/添加为修饰语告诉我哦🎨', className: 'start-message' };
+  this.messages.push(start_msg);
     const savedMessages = localStorage.getItem(this.localStorageKey);
     if (!savedMessages || savedMessages === '[object Object]') {
         localStorage.setItem(this.localStorageKey, JSON.stringify([]));
@@ -173,6 +173,10 @@ export default {
   max-width: 100%;
   border-radius: 4px;
   margin-top: 20px;
+}
+
+.start-message {
+  color: black;
 }
 
 .input-container {

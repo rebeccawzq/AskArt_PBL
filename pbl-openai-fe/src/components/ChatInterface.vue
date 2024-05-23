@@ -6,26 +6,25 @@
         :key="message.id"
         :class="{'message-user': message.type === 'user', 'message-ai': message.type === 'ai'}"
         @contextmenu.prevent="handleContextMenu($event)"
+        v-html="message.content"
       >
-        {{ message.content }}
       </div>
     </div>
     <div ref="contextMenu" v-if="showContextMenu" :style="{ top: menuPosition.y, left: menuPosition.x }" class="context-menu">
       <ul>
         <li @click="generateImageFromText">生成图片</li>
-<!--        <li @click="fetchFollowUpQuestions">追问</li>-->
         <li @click="addAsKeyword">添加为修饰语</li>
       </ul>
     </div>
     <div class="follow-up-questions-container">
-        <div class="follow-up-questions" v-if="followUpQuestions.length > 0">
-          <ul>
-            <li v-for="(question, index) in followUpQuestions" :key="index" @click="selectQuestion(question)">
-              {{ question }}
-            </li>
-          </ul>
-        </div>
+      <div class="follow-up-questions" v-if="followUpQuestions.length > 0">
+        <ul>
+          <li v-for="(question, index) in followUpQuestions" :key="index" @click="selectQuestion(question)">
+            {{ question }}
+          </li>
+        </ul>
       </div>
+    </div>
     <div class="input-container-wrapper">
       <div class="input-container">
         <button @mousedown="startRecognition" @mouseup="stopRecognition" @mouseleave="stopRecognition" class="voice-button">
@@ -197,12 +196,12 @@ export default {
     }
   },
   mounted() {
-    const start_msg = { id: this.messageCounter++, type: 'ai', content: '哈喽👋我是你的智囊团，有什么不懂的尽管问我吧！' +
-      '你可以问我：' +
-      '龙生九子中的饕餮有什么特点？眼睛是什么颜色？' +
-      '你也可以问我：' +
-      '扭扭棒要怎么制作？' };
-    this.messages.push(start_msg);
+  const start_msg = { id: this.messageCounter++, type: 'ai', content: '哈喽👋我是你的智囊团，有什么不懂的尽管问我吧！<br>' +
+    '你可以问我：<br>' +
+    '龙生九子中的饕餮有什么特点？眼睛是什么颜色？<br>' +
+    '你也可以问我：<br>' +
+    '扭扭棒要怎么制作？', className: 'start-message' };
+  this.messages.push(start_msg);
     const savedMessages = localStorage.getItem(this.localStorageKey);
     if (!savedMessages || savedMessages === '[object Object]') {
         localStorage.setItem(this.localStorageKey, JSON.stringify([]));
