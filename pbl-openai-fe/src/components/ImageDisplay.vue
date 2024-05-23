@@ -79,13 +79,13 @@ export default {
       this.messages.push(thinkingMessage);
       this.thinkingMessageId = thinkingMessage.id;
 
-      const timeout = 10000; // 10 seconds timeout
+      const timeout = 20000;
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Request timed out')), timeout)
       );
       try {
         const response = await Promise.race([
-          fetch('http://localhost:8300/image/false', {
+          fetch('http://18.223.254.93/backend/image/false', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

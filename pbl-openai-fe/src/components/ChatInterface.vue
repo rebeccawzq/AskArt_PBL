@@ -73,7 +73,7 @@ export default {
       if (!this.userInput.trim()) {
       return;
     }
-      const response = await fetch(`http://localhost:8300/chat/true`, {
+      const response = await fetch(`http://18.223.254.93/backend/chat/true`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
