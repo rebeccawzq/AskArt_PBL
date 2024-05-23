@@ -174,26 +174,34 @@ export default {
       this.$emit('add-keyword', this.selectedText);
       this.showContextMenu = false;
     },
-    startRecognition() {
-      if (!this.recognition) {
-        this.recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        this.recognition.lang = 'zh-CN'; // Set the language to Chinese
-        this.recognition.continuous = true;
-        this.recognition.interimResults = false;
-        this.recognition.onresult = (event) => {
-          const transcript = event.results[event.results.length - 1][0].transcript;
-          this.userInput += transcript;
-        };
-      }
-      this.isRecognizing = true;
-      this.recognition.start();
-    },
-    stopRecognition() {
+startRecognition() {
+  if (!this.recognition) {
+    this.recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    this.recognition.lang = 'zh-CN'; // Set the language to Chinese
+    this.recognition.continuous = true;
+    this.recognition.interimResults = false;
+    this.recognition.onresult = (event) => {
+      const transcript = event.results[event.results.length - 1][0].transcript;
+      this.userInput += transcript;
+    };
+    this.recognition.onerror = (event) => {
+      console.error('Speech Recognition Error:', event.error);
+    };
+    this.recognition.onend = () => {
       if (this.isRecognizing) {
-        this.isRecognizing = false;
-        this.recognition.stop();
+        this.recognition.start();
       }
-    }
+    };
+  }
+  this.isRecognizing = true;
+  this.recognition.start();
+},
+stopRecognition() {
+  if (this.isRecognizing) {
+    this.isRecognizing = false;
+    this.recognition.stop();
+  }
+}
   },
   mounted() {
   const start_msg = { id: this.messageCounter++, type: 'ai', content: '哈喽👋我是你的智囊团，有什么不懂的尽管问我吧！<br>' +
