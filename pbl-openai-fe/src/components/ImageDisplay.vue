@@ -148,6 +148,11 @@ export default {
   },
   mounted() {
     // Make keywords accessible in the browser's console for debugging
+     const start_msg = { id: this.messageCounter++, type: 'ai', content: '哈喽👋我是你的小画师，有什么想画的都可以告诉我！\n' +
+      '你可以说：' +
+      '绘制螭吻龙，表现它在吞食东西，装饰在古代建筑的脊尾上。' +
+      '如果你和智囊团在聊天的时候提到了想画出来的东西，可以选中聊天记录后点击右键，通过生成图片/添加为修饰语告诉我哦🎨'};
+    this.messages.push(start_msg);
     const savedMessages = localStorage.getItem(this.localStorageKey);
     if (!savedMessages || savedMessages === '[object Object]') {
         localStorage.setItem(this.localStorageKey, JSON.stringify([]));
@@ -232,28 +237,25 @@ export default {
 
 .keyword {
   position: relative;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  padding: 5px 15px;
+  padding: 3px 8px;
   margin: 5px;
-  /*background: #f1f1f1;*/
-  border-radius: 4px;
-  padding-right: 20px;
+  background: #f0f4ff; /* 背景颜色 */
+  border-radius: 15px; /* 圆角 */
+  border: 1px solid #d0d7ff; /* 边框颜色 */
+  font-size: 12px; /* 字体大小 */
+  color: #333; /* 字体颜色 */
 }
 
 .keyword .keyword-text {
-  background: #888888;
-  border-radius: 4px;
-  padding: 5px 10px;
+  margin-right: 5px;
 }
 
 .keyword .close-button {
-  position: absolute;
-  top: 5%;
-  right: 9px;
-  transform: translateY(-50%);
   cursor: pointer;
-  color: red;
+  color: #999; /* 关闭按钮颜色 */
   font-weight: bold;
+  margin-left: 5px;
 }
 </style>

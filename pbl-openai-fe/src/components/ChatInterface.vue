@@ -13,7 +13,7 @@
     <div ref="contextMenu" v-if="showContextMenu" :style="{ top: menuPosition.y, left: menuPosition.x }" class="context-menu">
       <ul>
         <li @click="generateImageFromText">生成图片</li>
-        <li @click="fetchFollowUpQuestions">追问</li>
+<!--        <li @click="fetchFollowUpQuestions">追问</li>-->
         <li @click="addAsKeyword">添加为修饰语</li>
       </ul>
     </div>
@@ -51,7 +51,7 @@ export default {
       thinkingMessageId: null,
       localStorageKey: 'chat-messages',
       messageCounter: 0,
-      hardcodedFollowUpQuestions: ["How can I help you?", "Do you need more information?", "Is there anything else you want to know?"],
+      hardcodedFollowUpQuestions: ["龙生九子中最爱吃东西的龙是哪条？", "龙的尾巴如何制作？", "饕餮的眼睛是什么颜色？"],
     };
   },
   methods: {
@@ -197,7 +197,11 @@ export default {
     }
   },
   mounted() {
-    const start_msg = { id: this.messageCounter++, type: 'ai', content: '你好' };
+    const start_msg = { id: this.messageCounter++, type: 'ai', content: '哈喽👋我是你的智囊团，有什么不懂的尽管问我吧！' +
+      '你可以问我：' +
+      '龙生九子中的饕餮有什么特点？眼睛是什么颜色？' +
+      '你也可以问我：' +
+      '扭扭棒要怎么制作？' };
     this.messages.push(start_msg);
     const savedMessages = localStorage.getItem(this.localStorageKey);
     if (!savedMessages || savedMessages === '[object Object]') {
