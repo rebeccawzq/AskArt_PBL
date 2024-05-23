@@ -126,7 +126,7 @@ export default {
     },
     async fetchFollowUpQuestions() {
       try {
-        const response = await fetch('http://localhost:8300/chat/follow-up');
+        const response = await fetch('http://18.223.254.93/backend/chat/follow-up');
         if (response.ok) {
           const data = await response.json();
           this.followUpQuestions = data.message; // Assuming the response contains an array of questions
