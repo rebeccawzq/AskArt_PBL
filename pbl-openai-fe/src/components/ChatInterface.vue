@@ -50,7 +50,8 @@ export default {
       thinkingMessageId: null,
       localStorageKey: 'chat-messages',
       messageCounter: 0,
-      hardcodedFollowUpQuestions: ["龙生九子中最爱吃东西的龙是哪条？", "龙的尾巴如何制作？", "饕餮的眼睛是什么颜色？"],
+      hardcodedFollowUpQuestions: ["可以给我描述三种未来城市可能的样子吗", 
+	      "未来城市的交通工具是什么样子", "海报制作有哪些步骤，需要注意什么"],
     };
   },
   methods: {
@@ -206,9 +207,9 @@ stopRecognition() {
   mounted() {
   const start_msg = { id: this.messageCounter++, type: 'ai', content: '哈喽👋我是你的智囊团，有什么不懂的尽管问我吧！<br>' +
     '你可以问我：<br>' +
-    '龙生九子中的饕餮有什么特点？眼睛是什么颜色？<br>' +
+   '未来城市是什么样子？人们会怎样生活？<br>' +
     '你也可以问我：<br>' +
-    '扭扭棒要怎么制作？', className: 'start-message' };
+    '简单的海报要怎么制作？', className: 'start-message' };
   this.messages.push(start_msg);
     const savedMessages = localStorage.getItem(this.localStorageKey);
     if (!savedMessages || savedMessages === '[object Object]') {

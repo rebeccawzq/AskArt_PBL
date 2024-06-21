@@ -83,7 +83,7 @@ export default {
       this.messages.push(thinkingMessage);
       this.thinkingMessageId = thinkingMessage.id;
 
-      const timeout = 20000;
+      const timeout = 25000;
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Request timed out')), timeout)
       );
@@ -150,8 +150,10 @@ export default {
     // Make keywords accessible in the browser's console for debugging
 const start_msg = { id: this.messageCounter++, type: 'ai', content: '哈喽👋我是你的小画师，有什么想画的都可以告诉我！<br>' +
     '你可以说：<br>' +
-    '绘制螭吻龙，表现它在吞食东西，装饰在古代建筑的脊尾上。<br>' +
-    '如果你和智囊团在聊天的时候提到了想画出来的东西，可以选中聊天记录后点击右键，通过生成图片/添加为修饰语告诉我哦🎨', className: 'start-message' };
+    '绘制未来城市，城市被大片的森林包围，建筑物与自然融为一体。每栋建筑物都有自己的太阳能电池板和风力发电机。<br>' +
+	'或者<br>'+
+	'设计一个简单的且带有文字的海报：主题是漂浮城市，这种城市建在水上，建筑物像岛屿一样，可以漂浮和移动<br>' +
+	'如果你和智囊团在聊天的时候提到了想画出来的东西，可以选中聊天记录后点击右键，通过生成图片/添加为修饰语告诉我哦🎨', className: 'start-message' };
   this.messages.push(start_msg);
     const savedMessages = localStorage.getItem(this.localStorageKey);
     if (!savedMessages || savedMessages === '[object Object]') {
