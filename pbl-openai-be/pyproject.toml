@@ -2,7 +2,7 @@
 name = "pbl-openai-be"
 version = "0.1.0"
 description = ""
-authors = ["yixing wang <yixwang@ea.com>"]
+authors = ["zhiqing wang <zw2780@columbia.edu>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
